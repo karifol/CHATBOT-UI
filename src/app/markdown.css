@@ -1,0 +1,65 @@
+/* マークダウン用のスタイル例。必要に応じてカスタマイズしてください */
+.markdown-body {
+  font-size: 1rem;
+  line-height: 1.7;
+  word-break: break-word;
+}
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+.markdown-body ul,
+.markdown-body ol {
+  margin-left: 1.5em;
+  margin-bottom: 1em;
+}
+.markdown-body code {
+  background: #f5f5f5;
+  border-radius: 4px;
+  padding: 0.2em 0.4em;
+  font-size: 0.95em;
+}
+.markdown-body pre {
+  background: #f5f5f5;
+  border-radius: 6px;
+  padding: 1em;
+  overflow-x: auto;
+  margin-bottom: 1em;
+}
+.markdown-body blockquote {
+  border-left: 4px solid #ddd;
+  padding-left: 1em;
+  color: #555;
+  margin: 1em 0;
+}
+
+/* テーブルのスタイル */
+.markdown-body table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 1em;
+  border: 1px solid #ddd;
+}
+
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.markdown-body th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
+.markdown-body tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.markdown-body tr:hover {
+  background-color: #f5f5f5;
+}
