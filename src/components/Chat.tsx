@@ -73,7 +73,7 @@ const Chat = (
             ))}
           </div>
           {/* フォームを下部中央に固定 */}
-          <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 bg-white w-250">
+          <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 bg-white w-full max-w-250">
             <ChatForm
               messageList={newMessageList}
               setMessageList={setMessageList}
