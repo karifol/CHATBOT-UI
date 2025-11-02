@@ -1,7 +1,7 @@
 import { GiSpellBook } from "react-icons/gi";
-import { APP_TITLE } from "@/lib/constants";
+import { APP_CONFIG } from "@/lib/constants";
 
-const TitleLogo = ({title = APP_TITLE}: {title?: string}) => {
+const TitleLogo = ({title = APP_CONFIG.TITLE}: {title?: string}) => {
   return (
     <div className="flex flex-col items-center">
       {/* アイコン */}

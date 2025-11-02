@@ -1,6 +1,6 @@
 import { AiOutlineQuestionCircle, AiOutlineClose } from "react-icons/ai";
 import { useState } from "react";
-import { APP_TITLE } from "@/lib/constants";
+import { APP_CONFIG } from "@/lib/constants";
 
 const Header = () => {
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
@@ -12,7 +12,7 @@ const Header = () => {
   return (
     <>
       <div className="h-10 flex justify-between items-center px-4 text-xl">
-        <div>{APP_TITLE}</div>
+        <div>{APP_CONFIG.TITLE}</div>
         {/* 説明ボタン */}
         <div>
           <AiOutlineQuestionCircle
@@ -27,7 +27,7 @@ const Header = () => {
         <div className="fixed inset-0 bg-gray-50 bg-opacity-90 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-gray-800">{APP_TITLE}</h2>
+              <h2 className="text-2xl font-bold text-gray-800">{APP_CONFIG.TITLE}</h2>
               <AiOutlineClose
                 className="w-6 h-6 cursor-pointer hover:text-gray-600 transition-colors duration-200"
                 onClick={toggleHelpModal}

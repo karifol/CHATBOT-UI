@@ -1,5 +1,5 @@
 import { ChatMessage, ResponseMessage } from "@/lib/types";
-import { CHAT_API_ENDPOINT } from "@/lib/constants";
+import { APP_CONFIG } from "@/lib/constants";
 
 /**
  * ストリーミングでチャットAPIを呼び出す
@@ -11,7 +11,7 @@ export async function callChatApiStream(
   onEvent: (event: ResponseMessage) => void
 ) {
 
-  const response = await fetch(CHAT_API_ENDPOINT, {
+  const response = await fetch(APP_CONFIG.CHAT_API_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
