@@ -3,7 +3,6 @@ import { useRef, useEffect } from "react";
 import ChatForm from "@/components/ChatForm";
 import ChatMessage from "@/components/ChatMessage";
 import InitialChat from "@/components/InitialChat";
-import Header from "@/components/Header";
 import { ChatMessage as ChatMessageType } from "@/lib/types";
 
 const Chat = (
@@ -21,7 +20,11 @@ const Chat = (
     }
   }, [messageList]);
 
-  if (messageList.length != 1) {
+  // システムメッセージのみの場合はInitialChatを表示
+  // ユーザーまたはアシスタントメッセージがある場合はチャット画面を表示
+  const hasUserMessages = messageList.some(msg => msg.user === "user" || msg.user === "assistant");
+  
+  if (hasUserMessages) {
     // tool_start, tool_endがある場合はtool_idをもとに統合する
     const newMessageList: ChatMessageType[] = [];
     newMessageList.push(messageList[0]); // systemメッセージはそのまま追加
@@ -51,8 +54,7 @@ const Chat = (
     }
 
     return (
-      <div className="h-screen w-full flex flex-col">
-        <Header />
+      <div className="h-full w-full flex flex-col">
         <div className="relative h-full flex justify-center">
           {/* チャット内容エリア */}
           <div

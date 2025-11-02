@@ -32,11 +32,10 @@ const ChatForm = ({
     }
 
     // ユーザーメッセージを追加
-    // ページが更新される
-    setMessageList(prev => [
-      ...prev,
+    const newMessageList: ChatMessage[] = [
+      ...messageList,
       {
-        user: "user",
+        user: "user" as const,
         message: text,
         tool_name: "",
         tool_input: "",
@@ -44,26 +43,20 @@ const ChatForm = ({
         tool_id: ""
       },
       {
-        user: "assistant",
+        user: "assistant" as const,
         message: "",
         tool_name: "",
         tool_input: "",
         tool_response: "",
         tool_id: ""
       }
-    ]);
-    messageList.push({
-      user: "user",
-      message: text,
-      tool_name: "",
-      tool_input: "",
-      tool_response: "",
-      tool_id: ""
-    });
+    ];
+    
+    setMessageList(newMessageList);
 
     // チャットAPIを呼び出す
     const messages = [];
-    for (const msg of messageList) {
+    for (const msg of newMessageList) {
       if (msg.user !== "user" && msg.user !== "assistant" && msg.user !== "system") {
         continue;
       }
@@ -76,8 +69,8 @@ const ChatForm = ({
     const responseList: ResponseMessage[] = [];
     await callChatApiStream(messages, (event) => {
       responseList.push(event);
-      const newList = updateMessageListWithAIResponse(messageList, responseList);
-      setMessageList(newList);
+      const updatedList = updateMessageListWithAIResponse(newMessageList, responseList);
+      setMessageList(updatedList);
     });
     setIsSubmitting(false);
   };

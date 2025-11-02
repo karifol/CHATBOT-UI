@@ -1,20 +1,64 @@
-import { AiOutlineQuestionCircle, AiOutlineClose } from "react-icons/ai";
+'use client';
+
+import { AiOutlineQuestionCircle, AiOutlineClose, AiOutlineLogout, AiOutlineUser } from "react-icons/ai";
 import { useState } from "react";
-import { APP_CONFIG } from "@/lib/constants";
+import { APP_CONFIG } from "../lib/constants";
+import { useAuth } from "../contexts/AuthContext";
+import { logoutUser } from "../lib/auth";
+import AuthModal from "./AuthModal";
 
 const Header = () => {
+  const { user, isLoggedIn, refreshUser } = useAuth();
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const toggleHelpModal = () => {
     setIsHelpModalOpen(!isHelpModalOpen);
+  };
+
+  const handleLogout = async () => {
+    try {
+      const result = await logoutUser();
+      if (result.success) {
+        await refreshUser();
+      } else {
+        console.error('ログアウトエラー:', result.message);
+      }
+    } catch (error) {
+      console.error('ログアウトエラー:', error);
+    }
   };
 
   return (
     <>
       <div className="h-10 flex justify-between items-center px-4 text-xl">
         <div>{APP_CONFIG.TITLE}</div>
-        {/* 説明ボタン */}
-        <div>
+        
+        {/* 右側のボタンエリア */}
+        <div className="flex items-center space-x-3">
+          {/* ユーザー情報とログアウトボタン（ログイン中のみ表示） */}
+          {isLoggedIn && user ? (
+            <div className="flex items-center space-x-2 text-sm">
+              <div className="flex items-center space-x-1 text-gray-700 max-w-32 sm:max-w-48">
+                <AiOutlineUser className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate" title={user.email}>
+                  {user.email}
+                </span>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-1 px-2 py-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors duration-200 flex-shrink-0"
+                title="ログアウト"
+              >
+                <AiOutlineLogout className="w-4 h-4" />
+                <span className="hidden sm:inline">ログアウト</span>
+              </button>
+            </div>
+          ): (
+            <></>
+          )}
+          
+          {/* 説明ボタン */}
           <AiOutlineQuestionCircle
             className="w-6 h-6 cursor-pointer hover:text-gray-600 transition-colors duration-200"
             onClick={toggleHelpModal}
@@ -65,6 +109,13 @@ const Header = () => {
           </div>
         </div>
       )}
+
+      {/* 認証モーダル */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        initialMode="login"
+      />
     </>
   )
 }

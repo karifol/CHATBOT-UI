@@ -1,5 +1,5 @@
 import { ChatMessage, ResponseMessage } from "@/lib/types";
-import { APP_CONFIG } from "@/lib/constants";
+import { APP_CONFIG } from "./constants";
 
 /**
  * ストリーミングでチャットAPIを呼び出す
