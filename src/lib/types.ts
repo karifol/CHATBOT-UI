@@ -10,19 +10,14 @@ export interface ChatMessage {
   tool_id: string;
 }
 
-// ストリームイベント
-export type StreamEvent =
-  | { type: "token"; content: string }
-  | {
-    tool_response: string;
-    type: "tool_start";
-    tool_name: string;
-    tool_input: string;
-    tool_id: string;
-  }
-  | {
-    type: "tool_end";
-    tool_name: string;
-    tool_response: string;
-    tool_id: string;
-  }
+// chatbotから返ってくるメッセージの型
+export interface ResponseMessage {
+  type: "AIMessageChunk" | "ToolMessage";
+  content?: string;
+  tool_name?: string;
+  tool_input?: string;
+  tool_response?: string;
+  tool_id?: string;
+  is_start?: boolean;
+  is_end?: boolean;
+}

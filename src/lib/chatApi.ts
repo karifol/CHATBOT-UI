@@ -1,7 +1,5 @@
-import { ChatMessage, StreamEvent } from "@/lib/types";
-
-// const CHATBOT_ENDPOINT = "https://ane1.wfc-internal.pt-aws.wni.com/PMDailyReportChatbot/chat"; // for local test
-const CHATBOT_ENDPOINT = "http://localhost:8080/";
+import { ChatMessage, ResponseMessage } from "@/lib/types";
+import { CHAT_API_ENDPOINT } from "@/lib/constants";
 
 /**
  * ストリーミングでチャットAPIを呼び出す
@@ -10,10 +8,10 @@ const CHATBOT_ENDPOINT = "http://localhost:8080/";
  */
 export async function callChatApiStream(
   messages: { role: string; content: string }[],
-  onEvent: (event: StreamEvent) => void
+  onEvent: (event: ResponseMessage) => void
 ) {
 
-  const response = await fetch(CHATBOT_ENDPOINT, {
+  const response = await fetch(CHAT_API_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -53,23 +51,40 @@ export async function callChatApiStream(
   }
 }
 
+/**
+ * APIのレスポンス形式からChatMessage形式に変換する
+ * @param messageList 
+ * @returns 
+ */
+export function convertFormat(
+  messageList: ResponseMessage[]
+): ChatMessage[] {
+  const chatMessages: ChatMessage[] = messageList.map((msg) => ({
+    user: msg.type === "AIMessageChunk" ? "assistant" : "user",
+    message: msg.content || "",
+    tool_name: msg.tool_name || "",
+    tool_input: msg.tool_input || "",
+    tool_response: msg.tool_response || "",
+    tool_id: msg.tool_id || ""
+  }));
+  return chatMessages;
+}
 
 // 生成AIからのメッセージを使ってmessageListを更新する
 export function updateMessageListWithAIResponse(
   messageList: ChatMessage[],
-  responseList: StreamEvent[] | StreamEvent
+  responseList: ResponseMessage | ResponseMessage[]
 ): ChatMessage[] {
   let newList = [...messageList];
 
-  for (const rawMessage of Array.isArray(responseList) ? responseList : [responseList]) {
+  for (const responseMessage of Array.isArray(responseList) ? responseList : [responseList]) {
     // ----------------------------
     // AIからのメッセージ
     // ----------------------------
-    if (rawMessage.type === "token" && rawMessage.content) {
-      const text: string = rawMessage.content;
-      console.log("Received token:", text);
+    if (responseMessage.type === "AIMessageChunk" && responseMessage.content) {
+      const text: string = responseMessage.content;
 
-      // rawMessageが最初のAIからのメッセージならケツに追加する
+      // responseMessageが最初のAIからのメッセージならケツに追加する
       // 判断基準はmassgeeListの最後のメッセージがuserかどうか
       let isStart = true;
       const lastMessage = newList[newList.length - 1];
@@ -108,16 +123,16 @@ export function updateMessageListWithAIResponse(
     // ----------------------------
     // ツール開始
     // ----------------------------
-    else if (rawMessage.type === "tool_start") {
+    else if (responseMessage.type === "ToolMessage" && responseMessage.is_start) {
       newList = [
         ...newList,
         {
           user: "tool_start",
-          message: `ツール ${rawMessage.tool_name} を実行中...`,
-          tool_name: rawMessage.tool_name || "",
-          tool_input: rawMessage.tool_input || "",
+          message: `ツール ${responseMessage.tool_name} を実行中...`,
+          tool_name: responseMessage.tool_name || "",
+          tool_input: responseMessage.tool_input || "",
           tool_response: "",
-          tool_id: rawMessage.tool_id || ""
+          tool_id: responseMessage.tool_id || ""
         }
       ];
     }
@@ -125,12 +140,12 @@ export function updateMessageListWithAIResponse(
     // ----------------------------
     // ツール終了
     // ----------------------------
-    else if (rawMessage.type === "tool_end") {
+    else if (responseMessage.type === "ToolMessage" && responseMessage.is_end) {
       newList = newList.map((msg) => {
-        if (msg.user === "tool_start" && msg.tool_id === rawMessage.tool_id) {
+        if (msg.user === "tool_start" && msg.tool_id === responseMessage.tool_id) {
           return {
             ...msg,
-            tool_response: rawMessage.tool_response || ""
+            tool_response: responseMessage.tool_response || ""
           };
         }
         return msg;

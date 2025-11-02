@@ -4,7 +4,7 @@ import { Textarea } from "@/components/Textarea";
 import { Button } from '@/components/ui/button';
 import { ChatMessage } from '@/lib/types';
 import { callChatApiStream, updateMessageListWithAIResponse } from '@/lib/chatApi';
-import { StreamEvent } from '@/lib/types';
+import { ResponseMessage } from '@/lib/types';
 import { LoaderCircle, Send } from 'lucide-react';
 
 const ChatForm = ({
@@ -73,7 +73,7 @@ const ChatForm = ({
       });
     }
 
-    const responseList: StreamEvent[] = [];
+    const responseList: ResponseMessage[] = [];
     await callChatApiStream(messages, (event) => {
       responseList.push(event);
       const newList = updateMessageListWithAIResponse(messageList, responseList);

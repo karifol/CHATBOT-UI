@@ -3,9 +3,8 @@ import TitleLogo from '@/components/TitleLogo'
 import ChatForm from '@/components/ChatForm'
 import ChatSuggest from '@/components/ChatSuggest'
 import Header from '@/components/Header'
-import { ChatMessage } from '@/lib/types'
+import { ChatMessage, ResponseMessage } from '@/lib/types'
 import { callChatApiStream, updateMessageListWithAIResponse } from '@/lib/chatApi'
-import { StreamEvent } from '@/lib/types';
 
 const InitialChat = (
   { messageList, setMessageList }:
@@ -60,7 +59,7 @@ const InitialChat = (
       });
     }
 
-    const responseList: StreamEvent[] = [];
+    const responseList: ResponseMessage[] = [];
     await callChatApiStream(messages, (event) => {
       responseList.push(event);
       const newList = updateMessageListWithAIResponse(messageList, responseList);
@@ -73,7 +72,7 @@ const InitialChat = (
       <Header />
       <div className="relative h-full w-full flex justify-center items-center bg-white">
         <div className="w-150">
-          <TitleLogo title="WFC PrismMaster Daily Report ChatBot" />
+          <TitleLogo />
           <ChatForm
             messageList={messageList}
             setMessageList={setMessageList}
