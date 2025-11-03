@@ -7,7 +7,9 @@ import { APP_CONFIG } from "./constants";
  * @param onEvent サーバーから届いたイベントごとに呼ばれるコールバック
  */
 export async function callChatApiStream(
-  messages: { role: string; content: string }[],
+  uid: string, // ユーザーID
+  session_id: string, // セッションID
+  messages: { role: string; content: string }[], // メッセージ履歴
   onEvent: (event: ResponseMessage) => void
 ) {
 
@@ -16,7 +18,7 @@ export async function callChatApiStream(
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ messages , uid, session_id }),
   });
 
   if (!response.body) {

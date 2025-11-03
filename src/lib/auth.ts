@@ -9,8 +9,6 @@ export interface CurrentUser {
   attributes?: Record<string, unknown>;
 }
 
-
-
 /**
  * 現在ログイン中のユーザーを取得する関数
  * @returns Promise<CurrentUser | null> ログイン中のユーザー情報、未ログインの場合はnull

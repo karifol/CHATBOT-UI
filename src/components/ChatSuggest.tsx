@@ -1,14 +1,12 @@
-interface ChatSuggestProps {
-  onSuggestClick: (message: string) => void;
-}
+/**
+ * チャットの提案メッセージコンポーネント
+ */
 
 const SUGGESTS = [
   "使い方を教えてください",
-  "明日の予測のブレについて教えて",
-  "週間予報の文脈を教えて",
 ];
 
-const ChatSuggest: React.FC<ChatSuggestProps> = ({ onSuggestClick }) => {
+const ChatSuggest = ({ onSuggestClick } : { onSuggestClick: (text: string) => void }) => {
   return (
     <div className="flex gap-2 mb-4 flex-wrap justify-center">
       {SUGGESTS.map((text, idx) => (

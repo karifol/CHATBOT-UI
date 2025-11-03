@@ -2,6 +2,7 @@ import { Button } from "./ui/button";
 import { useState } from "react";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { TiSpanner } from "react-icons/ti";
+import { LoaderCircle } from "lucide-react";
 
 // JSONのキーとバリューを色分けして再帰的に表示する関数
 const renderJsonColored = (data: unknown, indent = 0) => {
@@ -68,9 +69,15 @@ const ToolMessage = (
         <div className="text-xl font-bold">{tool_name}</div>
         {
           tool_response ? (
-            <div className="ml-4 text-green-600 font-semibold">完了</div>
+            <div className="ml-4 text-green-600 font-semibold flex items-center">
+              <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+              完了
+            </div>
           ) : (
-            <div className="ml-4 text-blue-600 font-semibold">実行中...</div>
+            <div className="ml-4 text-blue-600 font-semibold flex items-center">
+              <LoaderCircle className="animate-spin mr-2" size={14} />
+              実行中...
+            </div>
           )
         }
         { isOpen ? (

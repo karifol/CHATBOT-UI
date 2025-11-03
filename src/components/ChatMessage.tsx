@@ -1,10 +1,14 @@
-import UserMessage from './UserMessage';
-import AssistantMessage from './AssistantMessage';
-import SystemMessage from './SystemMessage';
-import ToolMessage from './ToolMessage';
+/**
+ * チャットメッセージコンポーネント
+ * メッセージの種類に応じて適切なサブコンポーネントをレンダリングする
+ */
+import UserMessage from '@/components/UserMessage';
+import AssistantMessage from '@/components/AssistantMessage';
+import SystemMessage from '@/components/SystemMessage';
+import ToolMessage from '@/components/ToolMessage';
 
 const ChatMessage = ({ message, user, tool_name, tool_input, tool_response}:
-  { message: string; user: string; tool_name: string; tool_input: string | object; tool_response: string | object; chart: string | object | undefined }
+  { message: string; user: string; tool_name: string; tool_input: string | object; tool_response: string | object;}
 ) => {
 
   // オブジェクトの場合はJSON.stringifyで表示
