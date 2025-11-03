@@ -38,33 +38,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const refreshUser = async () => {
     try {
       setLoading(true);
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🔍 認証状態をチェック中...');
-      }
       
       // 認証状態を確認
       const authenticated = await isAuthenticated();
-      if (process.env.NODE_ENV === 'development') {
-        console.log('📋 認証状態:', authenticated);
-      }
       setIsLoggedIn(authenticated);
       
       if (authenticated) {
         // ログイン中の場合はユーザー情報を取得
-        if (process.env.NODE_ENV === 'development') {
-          console.log('✅ ログイン確認済み - ユーザー情報を取得中...');
-        }
         const currentUser = await getCurrentAuthUser();
         setUser(currentUser);
-        if (process.env.NODE_ENV === 'development') {
-          console.log('👤 取得されたユーザー情報:', currentUser);
-        }
       } else {
         // 未ログインの場合はユーザー情報をクリア
         setUser(null);
-        if (process.env.NODE_ENV === 'development') {
-          console.log('❌ ユーザーは未認証です');
-        }
       }
     } catch (error) {
       console.error('💥 ユーザー情報の取得に失敗しました:', error);
@@ -72,9 +57,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoggedIn(false);
     } finally {
       setLoading(false);
-      if (process.env.NODE_ENV === 'development') {
-        console.log('🏁 認証チェック完了');
-      }
     }
   };
 

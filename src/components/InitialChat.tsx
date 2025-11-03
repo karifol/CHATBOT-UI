@@ -11,11 +11,12 @@ import ChatSuggest from '@/components/ChatSuggest'
 import { ChatMessage } from '@/lib/types'
 
 const InitialChat = (
-  { messageList, setMessageList, isLoading }:
+  { messageList, setMessageList, isLoading, onSendMessage }:
   {
     messageList: ChatMessage[];
     setMessageList: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
     isLoading: boolean;
+    onSendMessage: (newMessageList: ChatMessage[]) => Promise<void>;
   }
 ) => {
 
@@ -33,7 +34,13 @@ const InitialChat = (
         tool_id: ""
       }
     ];
+    console.log("サジェストクリックで追加するメッセージ:", newMessageList);
+    
+    // まず状態を更新してユーザーメッセージを表示
     setMessageList(newMessageList);
+    
+    // その後API呼び出し
+    await onSendMessage(newMessageList);
   };
 
   return (
@@ -45,6 +52,7 @@ const InitialChat = (
             messageList={messageList}
             setMessageList={setMessageList}
             isLoading={isLoading}
+            onSendMessage={onSendMessage}
           />
           <ChatSuggest onSuggestClick={handleSuggestClick} />
         </div>

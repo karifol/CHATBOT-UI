@@ -21,3 +21,22 @@ export interface ResponseMessage {
   is_start?: boolean;
   is_end?: boolean;
 }
+
+// チャット履歴アイテム
+export interface ChatHistoryItem {
+  session_id: string;
+  uid: string;
+  sessions: ChatHistorySession[];
+}
+
+export interface ChatHistorySession {
+  last_updated: string;
+  session_id: string;
+  uid: string;
+  messages: ChatHistoryMessage[];
+}
+
+export interface ChatHistoryMessage {
+  role: "user" | "assistant" | "system";
+  content: string;
+}

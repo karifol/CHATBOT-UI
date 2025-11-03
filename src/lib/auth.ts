@@ -15,9 +15,7 @@ export interface CurrentUser {
  */
 export const getCurrentAuthUser = async (): Promise<CurrentUser | null> => {
   try {
-    console.log('🔍 getCurrentUser() を実行中...');
     const user: AuthUser = await getCurrentUser();
-    console.log('✅ getCurrentUser() 成功:', user);
     
     // ユーザー情報を整形して返す
     const currentUser = {
@@ -27,7 +25,6 @@ export const getCurrentAuthUser = async (): Promise<CurrentUser | null> => {
       attributes: user.signInDetails ? { ...user.signInDetails } as Record<string, unknown> : {}
     };
     
-    console.log('📋 整形されたユーザー情報:', currentUser);
     return currentUser;
   } catch (error) {
     console.log('❌ ユーザーが認証されていません:', error);
@@ -41,24 +38,13 @@ export const getCurrentAuthUser = async (): Promise<CurrentUser | null> => {
  */
 export const isAuthenticated = async (): Promise<boolean> => {
   try {
-    console.log('🔍 fetchAuthSession() を実行中...');
     const session = await fetchAuthSession();
-    console.log('📋 完全なセッション情報:', session);
-    console.log('📋 セッション情報:', {
-      hasTokens: !!session.tokens,
-      hasAccessToken: !!session.tokens?.accessToken,
-      hasIdToken: !!session.tokens?.idToken,
-      credentials: !!session.credentials,
-      identityId: session.identityId
-    });
     
     // より詳細なチェックを実行
     if (session.tokens?.accessToken) {
-      console.log('✅ アクセストークンあり');
       try {
         // getCurrentUser でも確認
         await getCurrentUser();
-        console.log('✅ getCurrentUser() も成功');
         return true;
       } catch (userError) {
         console.log('⚠️ セッションはあるがgetCurrentUser()失敗:', userError);
@@ -124,16 +110,11 @@ export interface ConfirmSignUpParams {
  */
 export const loginUser = async ({ username, password }: LoginParams) => {
   try {
-    console.log('� ログイン試行中...', username);
     const { isSignedIn, nextStep } = await signIn({ username, password });
     
-    console.log('📋 ログイン結果:', { isSignedIn, nextStep });
-    
     if (isSignedIn) {
-      console.log('✅ ログイン成功');
       return { success: true, user: await getCurrentUser() };
     } else {
-      console.log('⚠️ 追加のステップが必要:', nextStep);
       return { success: false, nextStep, message: '追加の認証ステップが必要です' };
     }
   } catch (error: unknown) {

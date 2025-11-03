@@ -1,4 +1,4 @@
-import { ChatMessage, ResponseMessage } from "@/lib/types";
+import { ChatMessage, ResponseMessage, ChatHistorySession } from "@/lib/types";
 import { APP_CONFIG } from "./constants";
 
 /**
@@ -12,6 +12,8 @@ export async function callChatApiStream(
   messages: { role: string; content: string }[], // メッセージ履歴
   onEvent: (event: ResponseMessage) => void
 ) {
+
+  console.log("callChatApiStream called with messages:", messages);
 
   const response = await fetch(APP_CONFIG.CHAT_API_ENDPOINT, {
     method: "POST",
@@ -75,85 +77,143 @@ export function convertFormat(
 // 生成AIからのメッセージを使ってmessageListを更新する
 export function updateMessageListWithAIResponse(
   messageList: ChatMessage[],
-  responseList: ResponseMessage | ResponseMessage[]
+  responseList: ResponseMessage[]
 ): ChatMessage[] {
-  let newList = [...messageList];
+  // メッセージリストをコピー
+  let baseList = [...messageList];
+  
+  // 最後のメッセージから連続するassistantメッセージとtoolメッセージを除外
+  while (baseList.length > 0) {
+    const lastMessage = baseList[baseList.length - 1];
+    if (lastMessage.user === "assistant" || 
+        lastMessage.user === "tool_start" || 
+        lastMessage.user === "tool_end") {
+      baseList = baseList.slice(0, -1);
+    } else {
+      break;
+    }
+  }
 
-  for (const responseMessage of Array.isArray(responseList) ? responseList : [responseList]) {
+  const newList = [...baseList];
+  
+  // AIメッセージの内容を累積
+  let assistantMessageContent = "";
+  const toolMessages: { [key: string]: ChatMessage } = {};
+
+  // レスポンスリストを順番に処理してAIメッセージとツールメッセージを構築
+  for (const responseMessage of responseList) {
     // ----------------------------
     // AIからのメッセージ
     // ----------------------------
     if (responseMessage.type === "AIMessageChunk" && responseMessage.content) {
-      const text: string = responseMessage.content;
-
-      // responseMessageが最初のAIからのメッセージならケツに追加する
-      // 判断基準はmassgeeListの最後のメッセージがuserかどうか
-      let isStart = true;
-      const lastMessage = newList[newList.length - 1];
-      if (lastMessage.user === "assistant") {
-        isStart = false;
-      }
-
-      // 最初のメッセージならケツに箱を用意する
-      if (isStart) {
-        newList = [
-          ...newList,
-          {
-            user: "assistant",
-            message: text,
-            tool_name: "",
-            tool_input: "",
-            tool_response: "",
-            tool_id: ""
-          }
-        ];
-      }
-      // 最初のメッセージでなければケツのメッセージを更新する
-      else {
-        newList = newList.map((msg, idx) => {
-          if (idx === newList.length - 1) {
-            return {
-              ...msg,
-              message: msg.message + text
-            };
-          }
-          return msg;
-        });
-      }
+      assistantMessageContent += responseMessage.content;
     }
 
     // ----------------------------
     // ツール開始
     // ----------------------------
     else if (responseMessage.type === "ToolMessage" && responseMessage.is_start) {
-      newList = [
-        ...newList,
-        {
+      const toolId = responseMessage.tool_id || "";
+      if (!toolMessages[toolId]) {
+        toolMessages[toolId] = {
           user: "tool_start",
           message: `ツール ${responseMessage.tool_name} を実行中...`,
           tool_name: responseMessage.tool_name || "",
           tool_input: responseMessage.tool_input || "",
           tool_response: "",
-          tool_id: responseMessage.tool_id || ""
-        }
-      ];
+          tool_id: toolId
+        };
+      }
     }
 
     // ----------------------------
     // ツール終了
     // ----------------------------
     else if (responseMessage.type === "ToolMessage" && responseMessage.is_end) {
-      newList = newList.map((msg) => {
-        if (msg.user === "tool_start" && msg.tool_id === responseMessage.tool_id) {
-          return {
-            ...msg,
-            tool_response: responseMessage.tool_response || ""
-          };
-        }
-        return msg;
-      });
+      const toolId = responseMessage.tool_id || "";
+      if (toolMessages[toolId]) {
+        toolMessages[toolId] = {
+          ...toolMessages[toolId],
+          tool_response: responseMessage.tool_response || ""
+        };
+      }
     }
   }
 
+  // ツールメッセージを追加
+  Object.values(toolMessages).forEach(toolMsg => {
+    newList.push(toolMsg);
+  });
+
+  // AIメッセージが存在する場合は最後に追加
+  if (assistantMessageContent) {
+    newList.push({
+      user: "assistant",
+      message: assistantMessageContent,
+      tool_name: "",
+      tool_input: "",
+      tool_response: "",
+      tool_id: ""
+    });
+  }
+
   return newList;
+}
+
+/**
+ * チャット履歴を取得する
+ * @param uid ユーザーID
+ * @returns チャット履歴のリスト
+ */
+export async function getChatHistory(uid: string): Promise<ChatHistorySession[]> {
+  try {
+    const response = await fetch(`${APP_CONFIG.HISTORY_API_ENDPOINT}/${uid}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    // レスポンスが配列の場合はそのまま返し、オブジェクトの場合はhistoryプロパティから取得
+    return data.sessions
+  } catch (error) {
+    console.error("チャット履歴の取得に失敗しました:", error);
+    return [];
+  }
+}
+
+/**
+ * 特定のセッションのメッセージを取得してChatMessage形式に変換する
+ * @param uid ユーザーID
+ * @param sessionId セッションID
+ * @returns ChatMessage形式のメッセージリスト
+ */
+export async function getSessionMessages(uid: string, sessionId: string): Promise<ChatMessage[]> {
+  try {
+    const history = await getChatHistory(uid);
+    const session = history.find(s => s.session_id === sessionId);
+    
+    if (!session) {
+      throw new Error(`セッション ${sessionId} が見つかりません`);
+    }
+
+    // ChatHistoryMessage形式からChatMessage形式に変換
+    return session.messages.map(msg => ({
+      user: msg.role as "assistant" | "user" | "system",
+      message: msg.content,
+      tool_name: "",
+      tool_input: "",
+      tool_response: "",
+      tool_id: ""
+    }));
+  } catch (error) {
+    console.error("セッションメッセージの取得に失敗しました:", error);
+    return [];
+  }
 }

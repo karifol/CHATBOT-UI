@@ -4,6 +4,9 @@
 
 const SUGGESTS = [
   "使い方を教えてください",
+  "プログラミングについて質問があります",
+  "文章の要約をお願いします",
+  "創作のアイデアをください"
 ];
 
 const ChatSuggest = ({ onSuggestClick } : { onSuggestClick: (text: string) => void }) => {

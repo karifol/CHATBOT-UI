@@ -10,11 +10,12 @@ import LoadingIndicator from "@/components/LoadingIndicator";
 import { ChatMessage as ChatMessageType } from "@/lib/types";
 
 const Chat = (
-  { messageList, setMessageList, isLoading }:
+  { messageList, setMessageList, isLoading, onSendMessage }:
   {
     messageList: ChatMessageType[];
     setMessageList: React.Dispatch<React.SetStateAction<ChatMessageType[]>>;
     isLoading: boolean;
+    onSendMessage: (newMessageList: ChatMessageType[]) => Promise<void>;
   }
 ) => {
 
@@ -82,6 +83,7 @@ const Chat = (
             messageList={newMessageList}
             setMessageList={setMessageList}
             isLoading={isLoading}
+            onSendMessage={onSendMessage}
           />
         </div>
       </div>

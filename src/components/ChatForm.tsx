@@ -6,11 +6,12 @@ import { ChatMessage } from '@/lib/types';
 import { Send, Loader2 } from 'lucide-react';
 
 const ChatForm = ({
-  messageList, setMessageList, isLoading = false
+  messageList, setMessageList, isLoading = false, onSendMessage
 }: {
   messageList: ChatMessage[];
   setMessageList: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
   isLoading?: boolean;
+  onSendMessage: (newMessageList: ChatMessage[]) => Promise<void> | undefined;
 }) => {
 
   const [input, setInput] = useState("");
@@ -41,6 +42,7 @@ const ChatForm = ({
     ];
     
     setMessageList(newMessageList);
+    await onSendMessage(newMessageList);
   };
 
   return (
